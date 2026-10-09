@@ -21,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -32,6 +33,7 @@ fun CityListScreen(
     cities: List<City>,
     onAddCity: (City) -> Unit,
     onUpdateCity: (City, City) -> Unit,
+    onDeleteCity: (City) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var newCityName by remember { mutableStateOf("") }
@@ -157,17 +159,35 @@ fun CityListScreen(
         }
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             itemsIndexed(cities) { index, city ->
-                CityRow(
-                    city = city,
-                    onClick = {
-                        showAddCityFields = false
-                        newCityName = ""
-                        newProvinceName = ""
-                        selectedCity = city
-                        editedCityName = city.name
-                        editedProvinceName = city.province
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(end = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    CityRow(
+                        city = city,
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            showAddCityFields = false
+                            newCityName = ""
+                            newProvinceName = ""
+                            selectedCity = city
+                            editedCityName = city.name
+                            editedProvinceName = city.province
+                        },
+                    )
+                    Button(
+                        onClick = {
+                            onDeleteCity(city)
+                            if (selectedCity == city) {
+                                selectedCity = null
+                                editedCityName = ""
+                                editedProvinceName = ""
+                            }
+                        }
+                    ) {
+                        Text("Delete")
                     }
-                )
+                }
                 if (index < cities.lastIndex) {
                     HorizontalDivider()
                 }
@@ -180,10 +200,11 @@ fun CityListScreen(
 @Composable
 fun CityRow(
     city: City,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable { onClick() }
             .padding(horizontal = 20.dp, vertical = 16.dp)
@@ -213,7 +234,8 @@ fun CityListScreenPreview() {
                 City("Calgary", "AB")
             ),
             onAddCity = {},
-            onUpdateCity = { _, _ -> }
+            onUpdateCity = { _, _ -> },
+            onDeleteCity = {}
         )
     }
 }
